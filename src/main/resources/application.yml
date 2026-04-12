@@ -1,0 +1,22 @@
+spring:
+  application:
+    name: taskflow_Siddarth
+    datasource:
+      url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:taskflow_db}
+      username: ${DB_USER:zomato_dev}
+      password: ${DB_PASSWORD:supersecretpassword}
+      driver-class-name: org.postgresql.Driver
+
+    jpa:
+      # We are disabling auto-migration. We will use flyway
+      hibernate:
+        ddl-auto: validate
+        properties:
+          hibernate:
+            dialect: org.hibernate.dialect.PostgreSQLDialect
+            format_sql: true
+        show-sql: true
+
+    flyway:
+      enabled: true
+      # This way flyway will look.
