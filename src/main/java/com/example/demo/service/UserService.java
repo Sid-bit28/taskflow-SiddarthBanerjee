@@ -16,6 +16,17 @@ public class UserService {
 
     public User registerUser(String name, String email, String rawPassword) {
         // Need to check if the email already exists using userRepository.findByEmail()
-        return null;
+        if(userRepository.findByEmail(email).isPresent()){
+            throw new RuntimeException("Email already exists");
+        }
+
+        String encodedPassword = bCryptPasswordEncoder.encode(rawPassword);
+
+        User user = User.builder()
+                .name(name)
+                .email(email)
+                .password(encodedPassword)
+                .build();
+        return userRepository.save(user);
     }
 }
