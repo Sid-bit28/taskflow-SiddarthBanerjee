@@ -28,10 +28,12 @@ public class Task {
 
     private String description;
 
+    @Builder.Default
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private TaskStatus status = TaskStatus.TODO;
 
+    @Builder.Default
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private TaskPriority priority = TaskPriority.MEDIUM;
@@ -44,7 +46,7 @@ public class Task {
     @ManyToOne(optional = true)
     @JoinColumn(name = "assignee_id", nullable = true)
     @OnDelete(action = OnDeleteAction.SET_NULL)
-    private User assignedUser;
+    private User assignee;
 
     private LocalDate dueDate;
 
