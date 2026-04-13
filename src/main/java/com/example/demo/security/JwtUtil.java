@@ -34,4 +34,28 @@ public class JwtUtil {
                 .signWith(getSigningKey())
                 .compact();
     }
+
+    // Extracting the email (subject) from the token payload
+    public String extractEmail(String token) {
+        return Jwts.parser()
+                .verifyWith(getSigningKey())
+                .build()
+                .parseSignedClaims(token)
+                .getPayload()
+                .getSubject();
+    }
+
+    // Checks if the token is valid and hasn't expired or been tampered
+    public boolean isTokenValid(String token) {
+        try {
+            Jwts.parser()
+                    .verifyWith(getSigningKey())
+                    .build()
+                    .parseSignedClaims(token);
+            return true;
+        } catch(Exception e) {
+            // This maybe due to token been expired or tampered
+            return false;
+        }
+    }
 }
