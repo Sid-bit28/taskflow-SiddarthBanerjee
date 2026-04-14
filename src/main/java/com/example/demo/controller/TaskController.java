@@ -62,6 +62,18 @@ public class TaskController {
 
         return ResponseEntity.ok(updatedTask);
     }
+
+    @DeleteMapping("/tasks/{taskId}")
+    public ResponseEntity<Void> deleteTask(
+            @PathVariable UUID taskId,
+            Authentication authentication) {
+
+        String email = authentication.getName();
+
+        taskService.deleteTask(taskId, email);
+
+        return ResponseEntity.noContent().build();
+    }
 }
 
 // eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJzaWRkYXJ0aEBleGFtcGxlLmNvbSIsInVzZXJfaWQiOiI1ZTZlZTM5MC02ZjIyLTQwMTUtYmM2MC0xM2Y0MGExNzcyNGUiLCJpYXQiOjE3NzYxMzgxNjIsImV4cCI6MTc3NjIyNDU2Mn0.DMCoADeAqW9edZSGelMuoNImThDjdu8GKy0A1lJHyklst8KEj7nYC0Y2QT0unHsX6sNfTILsMWU4hYd9BN9vIQ

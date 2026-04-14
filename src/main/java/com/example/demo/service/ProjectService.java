@@ -3,6 +3,8 @@ package com.example.demo.service;
 import com.example.demo.dto.ProjectUpdateRequest;
 import com.example.demo.entity.Project;
 import com.example.demo.entity.User;
+import com.example.demo.exception.ForbiddenAccessException;
+import com.example.demo.exception.ResourceNotFoundException;
 import com.example.demo.repository.ProjectRepository;
 import com.example.demo.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -19,7 +21,7 @@ public class ProjectService {
 
     public Project createProject(String name, String description, String ownerEmail) {
         User user = userRepository.findByEmail(ownerEmail)
-                .orElseThrow(() -> new RuntimeException("User not found."));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found")); // <-- Fixed message
 
         Project project = Project.builder()
                 .name(name)
@@ -35,28 +37,29 @@ public class ProjectService {
 
     public void deleteProjectById(UUID projectId, String ownerEmail) {
         Project project = projectRepository.findById(projectId)
-                .orElseThrow(() -> new RuntimeException("Project not found."));
+                .orElseThrow(() -> new ResourceNotFoundException("Project not found"));
         if(!project.getOwner().getEmail().equals(ownerEmail)) {
-            throw new RuntimeException("You do not have permission to delete this project");
+            throw new ForbiddenAccessException("You do not have permission to delete this project");
         }
         projectRepository.delete(project);
     }
 
     public Project getProjectById(UUID projectId, String requesterEmail) {
         Project project = projectRepository.findById(projectId)
-                .orElseThrow(() -> new RuntimeException("Project not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Project not found"));
         if (!project.getOwner().getEmail().equals(requesterEmail)) {
-            throw new RuntimeException("You do not have permission to view this project");
+            throw new ForbiddenAccessException("You do not have permission to view this project");
         }
         return project;
     }
 
     public Project updateProject(UUID projectId, ProjectUpdateRequest request, String requesterEmail) {
         Project project = projectRepository.findById(projectId)
-                .orElseThrow(() -> new RuntimeException("Project not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Project not found"));
         if (!project.getOwner().getEmail().equals(requesterEmail)) {
-            throw new RuntimeException("You do not have permission to update this project");
+            throw new ForbiddenAccessException("You do not have permission to update this project");
         }
+
         if (request.getName() != null) {
             project.setName(request.getName());
         }

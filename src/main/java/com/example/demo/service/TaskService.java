@@ -6,6 +6,8 @@ import com.example.demo.entity.Project;
 import com.example.demo.entity.Task;
 import com.example.demo.entity.TaskStatus;
 import com.example.demo.entity.User;
+import com.example.demo.exception.ForbiddenAccessException;
+import com.example.demo.exception.ResourceNotFoundException;
 import com.example.demo.repository.ProjectRepository;
 import com.example.demo.repository.TaskRepository;
 import com.example.demo.repository.UserRepository;
@@ -24,10 +26,10 @@ public class TaskService {
 
     public Task createTask(UUID projectId, TaskRequest request, String requesterEmail) {
         Project project = projectRepository.findById(projectId)
-                .orElseThrow(() -> new RuntimeException("Project not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Project not found"));
 
         if (!project.getOwner().getEmail().equals(requesterEmail)) {
-            throw new RuntimeException("You do not have permission to add tasks to this project");
+            throw new ForbiddenAccessException("You do not have permission to add tasks to this project");
         }
 
         User assignee = null;
@@ -50,10 +52,10 @@ public class TaskService {
 
     public List<Task> getTasks(UUID projectId, TaskStatus status, UUID assigneeId, String requesterEmail) {
         Project project = projectRepository.findById(projectId)
-                .orElseThrow(() -> new RuntimeException("Project not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Project not found"));
 
         if (!project.getOwner().getEmail().equals(requesterEmail)) {
-            throw new RuntimeException("You do not have permission to view these tasks");
+            throw new ForbiddenAccessException("You do not have permission to view these tasks");
         }
         return taskRepository.findTaskWithOptionalFilters(projectId, status, assigneeId);
     }
@@ -62,7 +64,20 @@ public class TaskService {
         Task task = taskRepository.findById(taskId)
                 .orElseThrow(() -> new RuntimeException("Task not found"));
         if (!task.getProject().getOwner().getEmail().equals(requesterEmail)) {
-            throw new RuntimeException("You do not have permission to update this task");
+            throw new ForbiddenAccessException("You do not have permission to update this task");
+        }
+
+        if (request.getTitle() != null) {
+            task.setTitle(request.getTitle());
+        }
+        if (request.getDescription() != null) {
+            task.setDescription(request.getDescription());
+        }
+        if (request.getPriority() != null) {
+            task.setPriority(request.getPriority());
+        }
+        if (request.getDueDate() != null) {
+            task.setDueDate(request.getDueDate());
         }
         if (request.getStatus() != null) {
             task.setStatus(request.getStatus());
@@ -73,5 +88,17 @@ public class TaskService {
             task.setAssignee(assignee);
         }
         return taskRepository.save(task);
+    }
+
+    public void deleteTask(UUID taskId, String requesterEmail) {
+
+        Task task = taskRepository.findById(taskId)
+                .orElseThrow(() -> new RuntimeException("Task not found"));
+
+        if (!task.getProject().getOwner().getEmail().equals(requesterEmail)) {
+            throw new ForbiddenAccessException("You do not have permission to delete this task");
+        }
+
+        taskRepository.delete(task);
     }
 }
