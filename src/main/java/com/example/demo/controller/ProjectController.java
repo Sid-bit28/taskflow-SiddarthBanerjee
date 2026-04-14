@@ -1,6 +1,7 @@
 package com.example.demo.controller;
 
 import com.example.demo.dto.ProjectRequest;
+import com.example.demo.dto.ProjectUpdateRequest;
 import com.example.demo.entity.Project;
 import com.example.demo.service.ProjectService;
 import jakarta.validation.Valid;
@@ -44,5 +45,27 @@ public class ProjectController {
         String ownerEmail = authentication.getName();
         projectService.deleteProjectById(id, ownerEmail);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<Project> getProjectById(
+            @PathVariable UUID id,
+            Authentication authentication) {
+
+        String email = authentication.getName();
+        Project project = projectService.getProjectById(id, email);
+        return ResponseEntity.ok(project);
+    }
+
+    @PatchMapping("/{id}")
+    public ResponseEntity<Project> updateProject(
+            @PathVariable UUID id,
+            @RequestBody ProjectUpdateRequest request,
+            Authentication authentication) {
+
+        String email = authentication.getName();
+        Project updatedProject = projectService.updateProject(id, request, email);
+
+        return ResponseEntity.ok(updatedProject);
     }
 }
