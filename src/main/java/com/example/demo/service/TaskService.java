@@ -1,6 +1,7 @@
 package com.example.demo.service;
 
 import com.example.demo.dto.TaskRequest;
+import com.example.demo.dto.TaskUpdateRequest;
 import com.example.demo.entity.Project;
 import com.example.demo.entity.Task;
 import com.example.demo.entity.TaskStatus;
@@ -11,6 +12,7 @@ import com.example.demo.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -43,6 +45,33 @@ public class TaskService {
                 .project(project)
                 .assignee(assignee)
                 .build();
+        return taskRepository.save(task);
+    }
+
+    public List<Task> getTasks(UUID projectId, TaskStatus status, UUID assigneeId, String requesterEmail) {
+        Project project = projectRepository.findById(projectId)
+                .orElseThrow(() -> new RuntimeException("Project not found"));
+
+        if (!project.getOwner().getEmail().equals(requesterEmail)) {
+            throw new RuntimeException("You do not have permission to view these tasks");
+        }
+        return taskRepository.findTaskWithOptionalFilters(projectId, status, assigneeId);
+    }
+
+    public Task updateTask(UUID taskId, TaskUpdateRequest request, String requesterEmail) {
+        Task task = taskRepository.findById(taskId)
+                .orElseThrow(() -> new RuntimeException("Task not found"));
+        if (!task.getProject().getOwner().getEmail().equals(requesterEmail)) {
+            throw new RuntimeException("You do not have permission to update this task");
+        }
+        if (request.getStatus() != null) {
+            task.setStatus(request.getStatus());
+        }
+        if (request.getAssigneeId() != null) {
+            User assignee = userRepository.findById(request.getAssigneeId())
+                    .orElseThrow(() -> new RuntimeException("Assignee not found"));
+            task.setAssignee(assignee);
+        }
         return taskRepository.save(task);
     }
 }

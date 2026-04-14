@@ -3,16 +3,18 @@ package com.example.demo.entity;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.JdbcTypeCode; // <-- Added Import
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.hibernate.type.SqlTypes; // <-- Added Import
 
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.util.UUID;
 
 @Entity
-@Table(name = "tasks")
+@Table(name = "tasks_v2")
 @Getter
 @Setter
 @NoArgsConstructor
