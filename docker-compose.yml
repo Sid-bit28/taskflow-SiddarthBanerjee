@@ -1,8 +1,9 @@
+version: '3.8'
+
 services:
-  postgres:
+  db:
     image: postgres:15-alpine
-    container_name: taskflow_postgres
-    restart: always
+    container_name: taskflow_db
     env_file:
       - .env
     environment:
@@ -12,7 +13,29 @@ services:
     ports:
       - "${DB_PORT}:5432"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build: .
+    container_name: taskflow_api
+    env_file:
+      - .env
+    ports:
+      - "8080:8080"
+    environment:
+      - DB_HOST=db
+      - DB_PORT=5432
+      - DB_NAME=${DB_NAME}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+    depends_on:
+      db:
+        condition: service_healthy
 
 volumes:
-  postgres_data:
+  pgdata:

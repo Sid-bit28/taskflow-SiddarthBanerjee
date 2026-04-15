@@ -14,7 +14,7 @@ import java.time.ZonedDateTime;
 import java.util.UUID;
 
 @Entity
-@Table(name = "tasks_v2")
+@Table(name = "tasks")
 @Getter
 @Setter
 @NoArgsConstructor
